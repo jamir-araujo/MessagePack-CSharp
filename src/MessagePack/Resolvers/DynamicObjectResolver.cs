@@ -275,6 +275,61 @@ namespace MessagePack.Resolvers
             }
         }
     }
+
+    /// <summary>
+    /// ObjectResolver by dynamic code generation, no needs MessagePackObject attribute and serialized key as string, allow private member.
+    /// </summary>
+    public sealed class DynamicKeylessContractlessObjectResolverAllowPrivate : IFormatterResolver
+    {
+        public static readonly DynamicContractlessObjectResolverAllowPrivate Instance = new DynamicContractlessObjectResolverAllowPrivate();
+
+        public IMessagePackFormatter<T> GetFormatter<T>()
+        {
+            return FormatterCache<T>.formatter;
+        }
+
+        static class FormatterCache<T>
+        {
+            public static readonly IMessagePackFormatter<T> formatter;
+
+            static FormatterCache()
+            {
+                if (typeof(T) == typeof(object))
+                {
+                    return;
+                }
+
+                var ti = typeof(T).GetTypeInfo();
+
+                if (ti.IsInterface)
+                {
+                    return;
+                }
+
+                if (ti.IsNullable())
+                {
+                    ti = ti.GenericTypeArguments[0].GetTypeInfo();
+
+                    var innerFormatter = Instance.GetFormatterDynamic(ti.AsType());
+                    if (innerFormatter == null)
+                    {
+                        return;
+                    }
+                    formatter = (IMessagePackFormatter<T>)Activator.CreateInstance(typeof(StaticNullableFormatter<>).MakeGenericType(ti.AsType()), new object[] { innerFormatter });
+                    return;
+                }
+
+                if (ti.IsAnonymous())
+                {
+                    formatter = (IMessagePackFormatter<T>)DynamicObjectTypeBuilder.BuildFormatterToDynamicMethod(typeof(T), true, true, false);
+                }
+                else
+                {
+                    formatter = (IMessagePackFormatter<T>)DynamicObjectTypeBuilder.BuildFormatterToDynamicMethod(typeof(T), false, true, true);
+                }
+            }
+        }
+    }
 }
 
 namespace MessagePack.Internal

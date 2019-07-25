@@ -117,6 +117,7 @@
     <Compile Include="ReadLargeStreamTest.cs" />
     <Compile Include="StreamStrictTest.cs" />
     <Compile Include="ThreadsafeHashtableTest.cs" />
+    <Compile Include="TypelessContractlessStandardResolverAllowPrivateTests.cs" />
     <Compile Include="TypelessContractlessStandardResolverTest.cs" />
     <Compile Include="ContractlessStandardResolverTest.cs" />
     <Compile Include="DictionaryTest.cs" />
