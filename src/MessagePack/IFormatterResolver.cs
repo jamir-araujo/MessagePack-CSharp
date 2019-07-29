@@ -27,7 +27,7 @@ namespace MessagePack
                     inner = inner.InnerException;
                 }
 
-                throw;
+                throw inner;
             }
 
             if (formatter == null)
